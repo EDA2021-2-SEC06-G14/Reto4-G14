@@ -27,12 +27,39 @@ from DISClib.ADT import list as lt
 assert cf
 
 
+
+
+servicefile_vertex = 'airports_full.csv'
+servicefile_edges = 'routes_full.csv'
+servicesfile_city = "worldcities.csv"
+initialStation = None
+sys.setrecursionlimit(2 ** 20)
+
 """
 La vista se encarga de la interacción con el usuario
 Presenta el menu de opciones y por cada seleccion
 se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
+def optionTwo():
+    cont = controller.init()
+    print("\nCargando información de transporte de singapur ....")
+    analyzer,firstservice,lastcity=controller.loadServices(cont, servicefile_vertex, servicefile_edges,servicesfile_city)
+    numedges = controller.totalConnectionsdi(analyzer)
+    numvertex = controller.totalStopsdi(analyzer)
+    print('Numero de vertices digrafo: ' + str(numvertex))
+    print('Numero de arcos digrafo: ' + str(numedges))
+    print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
+    numedges = controller.totalConnectionsno(analyzer)
+    numvertex = controller.totalStopsno(analyzer)
+    print('Numero de vertices grafo: ' + str(numvertex))
+    print('Numero de arcos grafo: ' + str(numedges))
+    numciu=controller.totalciu(analyzer)
+    print('Numero de ciudades mapa: ' + str(numciu))
+    print('Primer Aeropuerto: ' + str(firstservice))
+    print('Última ciudad: ' + str(lastcity))
+
+
 
 def printMenu():
     print("Bienvenido")
@@ -55,6 +82,7 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
+        optionTwo()
         print("Cargando información de los archivos ....")
 
     elif int(inputs[0]) == 2:
