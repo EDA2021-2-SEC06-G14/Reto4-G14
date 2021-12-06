@@ -113,4 +113,7 @@ def reqDos(catalog, aereo1, aereo2):
 def GetAirport(catalog, aereo):
     return model.GetAirport(catalog, aereo)
 
+def reqCuatro(catalog, origen, millas):
+    return model.reqCuatro(catalog, origen, millas)
+
 

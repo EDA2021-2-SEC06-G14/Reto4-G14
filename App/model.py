@@ -68,6 +68,7 @@ from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import prim as pr
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 
@@ -94,7 +95,8 @@ def newAnalyzer():
                     'airports': None,
                     'conect_digraph': None,
                     'conect_normgraph': None,
-                    'cities': None
+                    'cities': None,
+                    'SCC': None
                     }
 
         catalog['airports'] = m.newMap(numelements=14000,
@@ -140,8 +142,6 @@ def addCity(catalog, stopid, todo):
     Adiciona una estación como un vertice del grafo
     """
     try:
-        if mp.contains(catalog["cities"],stopid):
-            print(stopid)
         if not mp.contains(catalog["cities"],stopid):
             mp.put(catalog["cities"],stopid,todo)
         
@@ -178,6 +178,30 @@ def addConNormal(catalog, origin, destination, distance):
 # Funciones de consulta
 # ==============================
 
+def reqDos(catalog, aereo1, aereo2):
+
+    conectados = scc.KosarajuSCC(catalog["conect_digraph"])
+    numero = scc.connectedComponents(conectados)
+    fuerte = scc.stronglyConnected(conectados, aereo1, aereo2)
+    return [numero, fuerte]
+
+def reqCuatro(catalog, origen, millas):
+
+    disponibles  = (float(millas)/2)*1.6
+    search = pr.PrimMST(catalog["conect_normgraph"])
+    mst = pr.prim(catalog["conect_normgraph"], search, origen)
+
+    
+    
+
+    return mst
+
+
+
+# ==============================
+# Funciones Helper
+# ==============================
+
 def getNumVertices(grafo):
     return gr.numVertices(grafo)
 
@@ -187,26 +211,9 @@ def getNumArcos(grafo):
 def getMapSize(mapa):
     return m.size(mapa)
 
-def reqDos(catalog, aereo1, aereo2):
-
-    conectados = scc.KosarajuSCC(catalog["conect_digraph"])
-    numero = scc.connectedComponents(conectados)
-    fuerte = scc.stronglyConnected(conectados, aereo1, aereo2)
-    return [numero, fuerte]
-
 def GetAirport(catalog, aereo):
     aereopuertos = catalog["airports"]
     return me.getValue(m.get(aereopuertos, aereo))
-
-
-
-
-# ==============================
-# Funciones Helper
-# ==============================
-
-
-
 
 # ==============================
 # Funciones de Comparacion

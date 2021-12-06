@@ -112,6 +112,9 @@ def reqDos(catalog, aereo1, aereo2):
     print("- Does the \'" + a1["Name"] + "\' and the \'" + a2["Name"] + "\' belong together?")
     print("- ANS: " + str(data[1]))
 
+def reqCuatro(catalog, origen, millas):
+    data = controller.reqCuatro(catalog, origen, millas)
+
 
 
 
@@ -134,7 +137,7 @@ Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+    inputs = input('Seleccione una opción para continuar\n >')
     if int(inputs[0]) == 1:
         t1 = process_time()
         catalog = controller.init()
@@ -142,26 +145,25 @@ while True:
         Carga(catalog)
         t2 = process_time()
         print("Time = " + str(t2-t1)+"seg\n")
-        
 
     elif int(inputs[0]) == 2:
         print("Funcion en desarrollo...\n")
 
     elif int(inputs[0]) == 3:
-        t1 = process_time()
         aereo1 = input("Codigo IATA del aereopuerto 1: \n >")
         aereo2 = input("Codigo IATA del aereopuerto 2: \n >")
+        t1 = process_time()
         reqDos(catalog, aereo1, aereo2)
         t2 = process_time()
         print("Time = " + str(t2-t1)+"seg\n")
-
 
     elif int(inputs[0]) == 4:
         print("Funcion en desarrollo...\n")
 
     elif int(inputs[0]) == 5:
-        print("Funcion en desarrollo...\n")
-
+        origen = input("Aereopuerto de origen: \n >")
+        millas = input("Millas disponibles para el viaje: \n >")
+        reqCuatro(catalog, origen, millas)
     elif int(inputs[0]) == 6:
         print("Funcion en desarrollo...\n")
 
