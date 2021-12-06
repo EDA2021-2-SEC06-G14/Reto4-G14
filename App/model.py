@@ -88,34 +88,32 @@ def newAnalyzer():
    stops: Tabla de hash para guardar los vertices del grafo
    connections: Grafo para representar las rutas entre estaciones
    components: Almacena la informacion de los componentes conectados
-   paths: Estructura que almancena los caminos de costo minimo desde un
-           vertice determinado a todos los otros vértices del grafo
     """
     try:
-        analyzer = {
+        catalog = {
                     'airports': None,
                     'conect_digraph': None,
                     'conect_normgraph': None,
-                    'paths': None
+                    'cities': None
                     }
 
-        analyzer['airports'] = m.newMap(numelements=14000,
+        catalog['airports'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareStopIds)
-        analyzer['cities'] = m.newMap(numelements=14000,
+        catalog['cities'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareStopIds)
 
-        analyzer['conect_digraph'] = gr.newGraph(datastructure='ADJ_LIST',
+        catalog['conect_digraph'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
                                               size=14000,
                                               comparefunction=compareStopIds)
 
-        analyzer['conect_normgraph'] = gr.newGraph(datastructure='ADJ_LIST',
+        catalog['conect_normgraph'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=False,
                                               size=14000,
                                               comparefunction=compareStopIds)
-        return analyzer
+        return catalog
     except Exception as exp:
         error.reraise(exp, 'model:newAnalyzer')
 
@@ -124,171 +122,90 @@ def newAnalyzer():
 
 
 
-def addAirport(analyzer, stopid, todo):
+def addAirport(catalog, stopid, todo):
     """
     Adiciona una estación como un vertice del grafo
     """
     try:
-        if not gr.containsVertex(analyzer['conect_digraph'], stopid):
-            gr.insertVertex(analyzer['conect_digraph'], stopid)
-        if not mp.contains(analyzer["airports"],stopid):
-            mp.put(analyzer["airports"],stopid,todo)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addstop')
-
-def addCity(analyzer, stopid, todo):
-    """
-    Adiciona una estación como un vertice del grafo
-    """
-    try:
+        if not gr.containsVertex(catalog['conect_digraph'], stopid):
+            gr.insertVertex(catalog['conect_digraph'], stopid)
+        if not mp.contains(catalog["airports"],stopid):
+            mp.put(catalog["airports"],stopid,todo)
         
-        if not mp.contains(analyzer["cities"],stopid):
-            mp.put(analyzer["cities"],stopid,todo)
-        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:addstop')
+
+def addCity(catalog, stopid, todo):
+    """
+    Adiciona una estación como un vertice del grafo
+    """
+    try:
+        if mp.contains(catalog["cities"],stopid):
+            print(stopid)
+        if not mp.contains(catalog["cities"],stopid):
+            mp.put(catalog["cities"],stopid,todo)
+        
+
     except Exception as exp:
         error.reraise(exp, 'model:addstop')
 
 
-def addConnection(analyzer, origin, destination, distance):
+def addConnection(catalog, origin, destination, distance):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(analyzer['conect_digraph'], origin, destination)
+    edge = gr.getEdge(catalog['conect_digraph'], origin, destination)
     #if edge is None:
-    gr.addEdge(analyzer['conect_digraph'], origin, destination, distance)
-    return analyzer
+    gr.addEdge(catalog['conect_digraph'], origin, destination, distance)
+    
 
-def addConNormal(analyzer, origin, destination, distance):
+def addConNormal(catalog, origin, destination, distance):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(analyzer['conect_digraph'], destination, origin)
+    edge = gr.getEdge(catalog['conect_digraph'], destination, origin)
     if edge != None:
-        if not gr.containsVertex(analyzer['conect_normgraph'], destination):
-            gr.insertVertex(analyzer['conect_normgraph'], destination)
-        if not gr.containsVertex(analyzer['conect_normgraph'], origin):
-            gr.insertVertex(analyzer['conect_normgraph'], origin)
-        edgee = gr.getEdge(analyzer['conect_normgraph'], origin, destination)
+        if not gr.containsVertex(catalog['conect_normgraph'], destination):
+            gr.insertVertex(catalog['conect_normgraph'], destination)
+        if not gr.containsVertex(catalog['conect_normgraph'], origin):
+            gr.insertVertex(catalog['conect_normgraph'], origin)
+        edgee = gr.getEdge(catalog['conect_normgraph'], origin, destination)
         if edgee is None:
-            gr.addEdge(analyzer['conect_normgraph'], origin, destination, distance)
-    return analyzer
+            gr.addEdge(catalog['conect_normgraph'], origin, destination, distance)
+    
 
 # ==============================
 # Funciones de consulta
 # ==============================
 
+def getNumVertices(grafo):
+    return gr.numVertices(grafo)
 
-def connectedComponents(analyzer):
-    """
-    Calcula los componentes conectados del grafo
-    Se utiliza el algoritmo de Kosaraju
-    """
-    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
-    return scc.connectedComponents(analyzer['components'])
+def getNumArcos(grafo):
+    return gr.numEdges(grafo)
 
+def getMapSize(mapa):
+    return m.size(mapa)
 
-def minimumCostPaths(analyzer, initialStation):
-    """
-    Calcula los caminos de costo mínimo desde la estacion initialStation
-    a todos los demas vertices del grafo
-    """
-    analyzer['paths'] = djk.Dijkstra(analyzer['connections'], initialStation)
-    return analyzer
+def reqDos(catalog, aereo1, aereo2):
 
-#i
-def hasPath(analyzer, destStation):
-    """
-    Indica si existe un camino desde la estacion inicial a la estación destino
-    Se debe ejecutar primero la funcion minimumCostPaths
-    """
-    return djk.hasPathTo(analyzer['paths'], destStation)
+    conectados = scc.KosarajuSCC(catalog["conect_digraph"])
+    numero = scc.connectedComponents(conectados)
+    fuerte = scc.stronglyConnected(conectados, aereo1, aereo2)
+    return [numero, fuerte]
+
+def GetAirport(catalog, aereo):
+    aereopuertos = catalog["airports"]
+    return me.getValue(m.get(aereopuertos, aereo))
 
 
-def minimumCostPath(analyzer, destStation):
-    """
-    Retorna el camino de costo minimo entre la estacion de inicio
-    y la estacion destino
-    Se debe ejecutar primero la funcion minimumCostPaths
-    """
-    path = djk.pathTo(analyzer['paths'], destStation)
-    return path
-
-
-def totalStopsdi(analyzer):
-    """
-    Retorna el total de estaciones (vertices) del grafo
-    """
-    return gr.numVertices(analyzer['conect_digraph'])
-
-def totalciu(analyzer):
-    """
-    Retorna el total de estaciones (vertices) del grafo
-    """
-    return mp.size(analyzer['cities'])
-
-
-
-def totalConnectionsdi(analyzer):
-    """
-    Retorna el total arcos del grafo
-    """
-    return gr.numEdges(analyzer['conect_digraph'])
-
-def totalStopsno(analyzer):
-    """
-    Retorna el total de estaciones (vertices) del grafo
-    """
-    return gr.numVertices(analyzer['conect_normgraph'])
-
-
-def totalConnectionsno(analyzer):
-    """
-    Retorna el total arcos del grafo
-    """
-    return gr.numEdges(analyzer['conect_normgraph'])
-
-def servedRoutes(analyzer):
-    """
-    Retorna la estación que sirve a mas rutas.
-    Si existen varias rutas con el mismo numero se
-    retorna una de ellas
-    """
-    lstvert = m.keySet(analyzer['stops'])
-    maxvert = None
-    maxdeg = 0
-    for vert in lt.iterator(lstvert):
-        lstroutes = m.get(analyzer['stops'], vert)['value']
-        degree = lt.size(lstroutes)
-        if(degree > maxdeg):
-            maxvert = vert
-            maxdeg = degree
-    return maxvert, maxdeg
 
 
 # ==============================
 # Funciones Helper
 # ==============================
 
-def cleanServiceDistance(lastservice, service):
-    """
-    En caso de que el archivo tenga un espacio en la
-    distancia, se reemplaza con cero.
-    """
-    if service['Distance'] == '':
-        service['Distance'] = 0
-    if lastservice['Distance'] == '':
-        lastservice['Distance'] = 0
 
-
-def formatVertex(service):
-    """
-    Se formatea el nombrer del vertice con el id de la estación
-    seguido de la ruta.
-    """
-    name = service['BusStopCode'] + '-'
-    name = name + service['ServiceNo']
-    return name
 
 
 # ==============================

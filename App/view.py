@@ -23,16 +23,11 @@
 import config as cf
 import sys
 import controller
+from prettytable import PrettyTable, ALL
+from time import process_time
 from DISClib.ADT import list as lt
 assert cf
 
-
-
-
-servicefile_vertex = 'airports_full.csv'
-servicefile_edges = 'routes_full.csv'
-servicesfile_city = "worldcities.csv"
-initialStation = None
 sys.setrecursionlimit(2 ** 20)
 
 """
@@ -41,23 +36,82 @@ Presenta el menu de opciones y por cada seleccion
 se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
-def optionTwo():
-    cont = controller.init()
-    print("\nCargando información de transporte de singapur ....")
-    analyzer,firstservice,lastcity=controller.loadServices(cont, servicefile_vertex, servicefile_edges,servicesfile_city)
-    numedges = controller.totalConnectionsdi(analyzer)
-    numvertex = controller.totalStopsdi(analyzer)
-    print('Numero de vertices digrafo: ' + str(numvertex))
-    print('Numero de arcos digrafo: ' + str(numedges))
-    print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
-    numedges = controller.totalConnectionsno(analyzer)
-    numvertex = controller.totalStopsno(analyzer)
-    print('Numero de vertices grafo: ' + str(numvertex))
-    print('Numero de arcos grafo: ' + str(numedges))
-    numciu=controller.totalciu(analyzer)
-    print('Numero de ciudades mapa: ' + str(numciu))
-    print('Primer Aeropuerto: ' + str(firstservice))
-    print('Última ciudad: ' + str(lastcity))
+def Carga(catalog):
+    
+    firstservice1, lastservice1, firstcity, lastcity = controller.loadServices(catalog)
+    veritces1 = controller.getNumVertices(catalog["conect_digraph"])
+    veritces2 = controller.getNumVertices(catalog["conect_normgraph"])
+    arcos1 = controller.getNumArcos(catalog["conect_digraph"])
+    arcos2 = controller.getNumArcos(catalog["conect_normgraph"])
+    sizemap = controller.getMapSize(catalog["cities"])
+    
+
+    x = PrettyTable()
+    x.field_names = (["IATA", "Name", "City", "Country", "Latitude", "Longitude"])
+    x.max_width = 25
+    x.hrules = ALL
+    x.add_row([firstservice1["IATA"], firstservice1["Name"], firstservice1["City"], firstservice1["Country"], firstservice1["Latitude"], firstservice1["Longitude"]])
+    x.add_row([lastservice1["IATA"], lastservice1["Name"], lastservice1["City"], lastservice1["Country"], lastservice1["Latitude"], lastservice1["Longitude"]])
+
+    y = PrettyTable()
+    y.field_names = (["IATA", "Name", "City", "Country", "Latitude", "Longitude"])
+    y.max_width = 25
+    y.hrules = ALL
+    y.add_row([firstservice1["IATA"], firstservice1["Name"], firstservice1["City"], firstservice1["Country"], firstservice1["Latitude"], firstservice1["Longitude"]])
+    y.add_row([lastservice1["IATA"], lastservice1["Name"], lastservice1["City"], lastservice1["Country"], lastservice1["Latitude"], lastservice1["Longitude"]])
+
+
+    z = PrettyTable()
+    z.field_names = (["City", "Country", "Latitude", "Longitude", "Population"])
+    z.max_width = 25
+    z.hrules = ALL
+    z.add_row([firstcity["city_ascii"], firstcity["country"], firstcity["lat"], firstcity["lng"], firstcity["population"]])
+    z.add_row([lastcity["city_ascii"], lastcity["country"], lastcity["lat"], lastcity["lng"], lastcity["population"]])
+
+    print("=== Airports-Routes DiGraph ===")
+    print("Nodes: " + str(veritces1))
+    print("Edges: " + str(arcos1))
+    print("First and Last Airport loaded in the Graph: ")
+    print(x)
+    print("=== Airports-Routes Graph ===")
+    print("Nodes: " + str(veritces2))
+    print("Edges: " + str(arcos2))
+    print("First and Last Airport loaded in the Graph: ")
+    print(y)
+    print("=== City Network ===")
+    print("The number of cities are: " + str(sizemap))
+    print("First and Last Cities loaded in the data structure: ")
+    print(z)
+
+def reqDos(catalog, aereo1, aereo2):
+    data = controller.reqDos(catalog, aereo1, aereo2)
+    a1 = controller.GetAirport(catalog, aereo1)
+    a2 = controller.GetAirport(catalog, aereo2)
+
+    x = PrettyTable()
+    x.field_names = (["IATA", "Name", "City", "Country"])
+    x.max_width = 25
+    x.hrules = ALL
+    x.add_row([aereo1, a1["Name"], a1["City"], a1["Country"]])
+
+    y = PrettyTable()
+    y.field_names = (["IATA", "Name", "City", "Country"])
+    y.max_width = 25
+    y.hrules = ALL
+    y.add_row([aereo2, a2["Name"], a2["City"], a2["Country"]])
+
+    print("==========Req No.2 Inputs==========")
+    print("Airport-1 IATA code: " + aereo1)
+    print("Airport-2 IATA code: " + aereo2)
+    print("==========Req No.2 Answer==========")
+    print("+++ Airport IATA code: " + aereo1 + " +++")
+    print(x)
+    print("+++ Airport IATA code: " + aereo2 + " +++")
+    print(y)
+    print("- Number of SCC in Airport-Route network: " + str(data[0]))
+    print("- Does the \'" + a1["Name"] + "\' and the \'" + a2["Name"] + "\' belong together?")
+    print("- ANS: " + str(data[1]))
+
 
 
 
@@ -82,14 +136,25 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
-        optionTwo()
+        t1 = process_time()
+        catalog = controller.init()
         print("Cargando información de los archivos ....")
+        Carga(catalog)
+        t2 = process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
+        
 
     elif int(inputs[0]) == 2:
         print("Funcion en desarrollo...\n")
 
     elif int(inputs[0]) == 3:
-        print("Funcion en desarrollo...\n")
+        t1 = process_time()
+        aereo1 = input("Codigo IATA del aereopuerto 1: \n >")
+        aereo2 = input("Codigo IATA del aereopuerto 2: \n >")
+        reqDos(catalog, aereo1, aereo2)
+        t2 = process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
+
 
     elif int(inputs[0]) == 4:
         print("Funcion en desarrollo...\n")

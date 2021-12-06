@@ -51,7 +51,7 @@ def init():
 # ___________________________________________________
 
 
-def loadServices(analyzer, servicesfile_vertex, servicesfile_edges,servicesfile_city):
+def loadServices(catalog):
     """
     Carga los datos de los archivos CSV en el modelo.
     Se crea un arco entre cada par de estaciones que
@@ -59,108 +59,58 @@ def loadServices(analyzer, servicesfile_vertex, servicesfile_edges,servicesfile_
     addRouteConnection crea conexiones entre diferentes rutas
     servidas en una misma estación.
     """
-    servicesfile_ver = cf.data_dir + servicesfile_vertex
+    servicesfile_ver = cf.data_dir + 'airports-utf8-small.csv'
     input_file_ver = csv.DictReader(open(servicesfile_ver, encoding="utf-8"),
                                 delimiter=",")
-    firstservice=None
+    firstservice1= None
     for todo in input_file_ver:
-        if firstservice==None:
-            firstservice=todo
+        if firstservice1==None:
+            firstservice1=todo
         iata= todo["IATA"]
-        model.addAirport(analyzer, iata, todo)
+        model.addAirport(catalog, iata, todo)
+    lastservice1 = todo
         
     
-    servicesfile_edg = cf.data_dir + servicesfile_edges
+    servicesfile_edg = cf.data_dir + 'routes-utf8-small.csv'
     input_file_edg = csv.DictReader(open(servicesfile_edg, encoding="utf-8"),
                                 delimiter=",")
-    lastservice = None
+    
     for service in input_file_edg:
         origin=service["Departure"]
         destination=service["Destination"]
         distance = float(service["distance_km"])
-        model.addConnection(analyzer,origin,destination,distance)
-        model.addConNormal(analyzer,origin,destination,distance)
+        model.addConnection(catalog,origin,destination,distance)
+        model.addConNormal(catalog,origin,destination,distance)
     
-    servicesfile_cities = cf.data_dir + servicesfile_city
+    servicesfile_cities = cf.data_dir + "worldcities-utf8.csv"
     input_file_city = csv.DictReader(open(servicesfile_cities, encoding="utf-8"),
                                 delimiter=",")
-    lastcity = None
+    firstcity = None
     for service in input_file_city:
+        if firstcity == None:
+            firstcity = service
         ciudadela=service["city_ascii"]
-        model.addCity(analyzer, ciudadela,service)
-        lastcity=service
+        model.addCity(catalog, ciudadela,service)
+    lastcity=service
         
-    #model.addRouteConnections(analyzer)
-    return analyzer,firstservice,lastcity
+    return firstservice1, lastservice1, firstcity, lastcity
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
+def getNumVertices(grafo):
+    return model.getNumVertices(grafo)
+
+def getNumArcos(grafo):
+    return model.getNumArcos(grafo)
+
+def getMapSize(mapa):
+    return model.getMapSize(mapa)
+
+def reqDos(catalog, aereo1, aereo2):
+    return model.reqDos(catalog, aereo1, aereo2)
+
+def GetAirport(catalog, aereo):
+    return model.GetAirport(catalog, aereo)
 
 
-def totalStopsdi(analyzer):
-    """
-    Total de paradas de autobus
-    """
-    return model.totalStopsdi(analyzer)
-
-
-def totalConnectionsdi(analyzer):
-    """
-    Total de enlaces entre las paradas
-    """
-    return model.totalConnectionsdi(analyzer)
-
-def totalStopsno(analyzer):
-    """
-    Total de paradas de autobus
-    """
-    return model.totalStopsno(analyzer)
-
-
-def totalConnectionsno(analyzer):
-    """
-    Total de enlaces entre las paradas
-    """
-    return model.totalConnectionsno(analyzer)
-def totalciu(analyzer):
-    """
-    Total de enlaces entre las paradas
-    """
-    return model.totalciu(analyzer)
-
-def connectedComponents(analyzer):
-    """
-    Numero de componentes fuertemente conectados
-    """
-    return model.connectedComponents(analyzer)
-
-
-def minimumCostPaths(analyzer, initialStation):
-    """
-    Calcula todos los caminos de costo minimo de initialStation a todas
-    las otras estaciones del sistema
-    """
-    return model.minimumCostPaths(analyzer, initialStation)
-
-
-def hasPath(analyzer, destStation):
-    """
-    Informa si existe un camino entre initialStation y destStation
-    """
-    return model.hasPath(analyzer, destStation)
-
-
-def minimumCostPath(analyzer, destStation):
-    """
-    Retorna el camino de costo minimo desde initialStation a destStation
-    """
-    return model.minimumCostPath(analyzer, destStation)
-
-
-def servedRoutes(analyzer):
-    """
-    Retorna el camino de costo minimo desde initialStation a destStation
-    """
-    maxvert, maxdeg = model.servedRoutes(analyzer)
-    return maxvert, maxdeg
