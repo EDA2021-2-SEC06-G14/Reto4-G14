@@ -124,4 +124,7 @@ def GetAirport(catalog, aereo):
 def reqCuatro(catalog, origen, millas):
     return model.reqCuatro(catalog, origen, millas)
 
+def reqCinco(catalog, cerrar):
+    return model.reqCinco(catalog, cerrar)
+
 

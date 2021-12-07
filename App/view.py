@@ -141,7 +141,8 @@ def reqDos(catalog, aereo1, aereo2):
 def reqCuatro(catalog, origen, millas):
     data = controller.reqCuatro(catalog, origen, millas)
 
-
+def reqCinco(catalog, cerrar):
+    data = controller.reqCinco(catalog, cerrar)
 
 
 def printMenu():
@@ -194,8 +195,11 @@ while True:
         millas = input("Millas disponibles para el viaje: \n >")
         reqCuatro(catalog, origen, millas)
     elif int(inputs[0]) == 6:
-        print("Funcion en desarrollo...\n")
-
+        cerrar = input("Aereopuerto que va a ser cerrado: \n >")
+        t1 = process_time()
+        reqCinco(catalog, cerrar)
+        t2 = process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
     elif int(inputs[0]) == 7:
         print("Funcion en desarrollo...\n")
 

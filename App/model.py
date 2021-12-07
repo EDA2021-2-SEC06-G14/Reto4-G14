@@ -204,8 +204,6 @@ def reqUno(catalog):
     return intercon
 
 
-
-
 def reqDos(catalog, aereo1, aereo2):
 
     conectados = catalog["SCC"]
@@ -218,11 +216,13 @@ def reqCuatro(catalog, origen, millas):
     disponibles  = (float(millas)/2)*1.6
     search = pr.PrimMST(catalog["conect_normgraph"])
     mst = pr.prim(catalog["conect_normgraph"], search, origen)
-
-    
-    
-
     return mst
+
+
+def reqCinco(catalog, cerrar):
+
+    a = ""
+
 
 
 
