@@ -87,6 +87,7 @@ def reqUno(catalog):
     data = controller.reqUno(catalog)
     data = lt.subList(data,1,5)
     data = lt.iterator(data)
+    conectados = controller.numConecados(catalog)
     veritces = controller.getNumVertices(catalog["conect_digraph"])
     x = PrettyTable()
     x.field_names = (["Name", "City", "Country", "IATA", "Conections", "Inbound", "Outbound"])
@@ -101,7 +102,7 @@ def reqUno(catalog):
     print("Most connected airports in network (TOP 5)")
     print("Number of airports in network: " + str(veritces) + "\n")
     print("========== Req No. 1 Answer ==========")
-    print("Connected airports inside network: ")
+    print("Connected airports inside network: " + str(conectados))
     print("TOP 5 most connected airports... \n")
     print(x)
 
@@ -135,6 +136,7 @@ def reqDos(catalog, aereo1, aereo2):
     print("- Number of SCC in Airport-Route network: " + str(data[0]))
     print("- Does the \'" + a1["Name"] + "\' and the \'" + a2["Name"] + "\' belong together?")
     print("- ANS: " + str(data[1]))
+
 
 def reqCuatro(catalog, origen, millas):
     data = controller.reqCuatro(catalog, origen, millas)

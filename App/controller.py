@@ -92,12 +92,17 @@ def loadServices(catalog):
         ciudadela=service["city_ascii"]
         model.addCity(catalog, ciudadela,service)
     lastcity=service
+
+    model.conectados(catalog)
         
     return firstservice1, lastservice1, firstcity, lastcity
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
+def numConecados(catalog):
+    return model.numConecados(catalog)
+
 def getNumVertices(grafo):
     return model.getNumVertices(grafo)
 

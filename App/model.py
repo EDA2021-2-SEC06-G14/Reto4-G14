@@ -65,7 +65,7 @@ los mismos.
  """
 import config
 from DISClib.ADT.graph import gr
-from DISClib.ADT import map as m
+from DISClib.ADT import map as mp
 from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import prim as pr
@@ -99,10 +99,10 @@ def newAnalyzer():
                     'SCC': None
                     }
 
-        catalog['airports'] = m.newMap(numelements=14000,
+        catalog['airports'] = mp.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareStopIds)
-        catalog['cities'] = m.newMap(numelements=14000,
+        catalog['cities'] = mp.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareStopIds)
 
@@ -143,8 +143,12 @@ def addCity(catalog, stopid, todo):
     """
     try:
         if not mp.contains(catalog["cities"],stopid):
-            mp.put(catalog["cities"],stopid,todo)
-        
+            city = lt.newList("ARRAY_LIST")
+            mp.put(catalog["cities"],stopid,city)
+        else:
+            city = me.getValue(mp.get(catalog["cities"],stopid))
+            
+        lt.addLast(city, todo)
 
     except Exception as exp:
         error.reraise(exp, 'model:addstop')
@@ -188,7 +192,7 @@ def reqUno(catalog):
         inedges = gr.indegree(catalog["conect_digraph"], v)
         outedges =  gr.outdegree(catalog["conect_digraph"], v)
         number = inedges + outedges
-        info = me.getValue(m.get(catalog["airports"], v))
+        info = me.getValue(mp.get(catalog["airports"], v))
         airp = {'edges': number,
                 'IN': inedges,
                 'OUT': outedges,
@@ -204,7 +208,7 @@ def reqUno(catalog):
 
 def reqDos(catalog, aereo1, aereo2):
 
-    conectados = scc.KosarajuSCC(catalog["conect_digraph"])
+    conectados = catalog["SCC"]
     numero = scc.connectedComponents(conectados)
     fuerte = scc.stronglyConnected(conectados, aereo1, aereo2)
     return [numero, fuerte]
@@ -226,6 +230,12 @@ def reqCuatro(catalog, origen, millas):
 # Funciones Helper
 # ==============================
 
+def conectados(catalog):
+    catalog["SCC"] = scc.KosarajuSCC(catalog["conect_digraph"])
+
+def numConecados(catalog):
+    return scc.connectedComponents(catalog["SCC"])
+
 def getNumVertices(grafo):
     return gr.numVertices(grafo)
 
@@ -233,11 +243,18 @@ def getNumArcos(grafo):
     return gr.numEdges(grafo)
 
 def getMapSize(mapa):
-    return m.size(mapa)
+    datos = mp.valueSet(mapa)
+    data = lt.iterator(datos)
+    size = 0
+
+    for i in data:
+        size += lt.size(i)
+
+    return size
 
 def GetAirport(catalog, aereo):
     aereopuertos = catalog["airports"]
-    return me.getValue(m.get(aereopuertos, aereo))
+    return me.getValue(mp.get(aereopuertos, aereo))
 
 # ==============================
 # Funciones de Comparacion
