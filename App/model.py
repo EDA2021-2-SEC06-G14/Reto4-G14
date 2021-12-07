@@ -178,6 +178,30 @@ def addConNormal(catalog, origin, destination, distance):
 # Funciones de consulta
 # ==============================
 
+def reqUno(catalog):
+
+    intercon = lt.newList("ARRAY_LIST")
+    vertices = gr.vertices(catalog["conect_digraph"])
+    ver = lt.iterator(vertices)
+
+    for v in ver:
+        inedges = gr.indegree(catalog["conect_digraph"], v)
+        outedges =  gr.outdegree(catalog["conect_digraph"], v)
+        number = inedges + outedges
+        info = me.getValue(m.get(catalog["airports"], v))
+        airp = {'edges': number,
+                'IN': inedges,
+                'OUT': outedges,
+                'airport' : info}
+        lt.addLast(intercon, airp)
+
+    intercon = sa.sort(intercon, cmpnumedges)
+
+    return intercon
+
+
+
+
 def reqDos(catalog, aereo1, aereo2):
 
     conectados = scc.KosarajuSCC(catalog["conect_digraph"])
@@ -243,3 +267,6 @@ def compareroutes(route1, route2):
         return 1
     else:
         return -1
+
+def cmpnumedges(edge1, edge2):
+    return edge1["edges"]>edge2["edges"]

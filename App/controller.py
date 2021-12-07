@@ -107,6 +107,9 @@ def getNumArcos(grafo):
 def getMapSize(mapa):
     return model.getMapSize(mapa)
 
+def reqUno(catalog):
+    return model.reqUno(catalog)
+
 def reqDos(catalog, aereo1, aereo2):
     return model.reqDos(catalog, aereo1, aereo2)
 

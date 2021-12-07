@@ -83,6 +83,30 @@ def Carga(catalog):
     print("First and Last Cities loaded in the data structure: ")
     print(z)
 
+def reqUno(catalog):
+    data = controller.reqUno(catalog)
+    data = lt.subList(data,1,5)
+    data = lt.iterator(data)
+    veritces = controller.getNumVertices(catalog["conect_digraph"])
+    x = PrettyTable()
+    x.field_names = (["Name", "City", "Country", "IATA", "Conections", "Inbound", "Outbound"])
+    x.max_width = 25
+    x.hrules = ALL
+    
+    for i in data:
+        x.add_row([i["airport"]["Name"], i["airport"]["City"], i["airport"]["Country"], i["airport"]["IATA"], i["edges"], i["IN"], i["OUT"]])
+
+
+    print("========== Req No. 1 Inputs ==========")
+    print("Most connected airports in network (TOP 5)")
+    print("Number of airports in network: " + str(veritces) + "\n")
+    print("========== Req No. 1 Answer ==========")
+    print("Connected airports inside network: ")
+    print("TOP 5 most connected airports... \n")
+    print(x)
+
+
+
 def reqDos(catalog, aereo1, aereo2):
     data = controller.reqDos(catalog, aereo1, aereo2)
     a1 = controller.GetAirport(catalog, aereo1)
@@ -147,7 +171,10 @@ while True:
         print("Time = " + str(t2-t1)+"seg\n")
 
     elif int(inputs[0]) == 2:
-        print("Funcion en desarrollo...\n")
+        t1 = process_time()
+        reqUno(catalog)
+        t2 = process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
 
     elif int(inputs[0]) == 3:
         aereo1 = input("Codigo IATA del aereopuerto 1: \n >")
