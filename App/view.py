@@ -238,13 +238,18 @@ while True:
     elif int(inputs[0]) == 5:
         origen = input("Aereopuerto de origen: \n >")
         millas = input("Millas disponibles para el viaje: \n >")
+        t1 = process_time()
         reqCuatro(catalog, origen, millas)
+        t2 =process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
+
     elif int(inputs[0]) == 6:
         cerrar = input("Aereopuerto que va a ser cerrado: \n >")
         t1 = process_time()
         reqCinco(catalog, cerrar)
         t2 = process_time()
         print("Time = " + str(t2-t1)+"seg\n")
+        
     elif int(inputs[0]) == 7:
         print("Funcion en desarrollo...\n")
 
