@@ -84,10 +84,9 @@ def Carga(catalog):
     print(z)
 
 def reqUno(catalog):
-    data = controller.reqUno(catalog)
+    data, total = controller.reqUno(catalog)
     data = lt.subList(data,1,5)
     data = lt.iterator(data)
-    conectados = controller.numConecados(catalog)
     veritces = controller.getNumVertices(catalog["conect_digraph"])
     x = PrettyTable()
     x.field_names = (["Name", "City", "Country", "IATA", "Conections", "Inbound", "Outbound"])
@@ -102,7 +101,7 @@ def reqUno(catalog):
     print("Most connected airports in network (TOP 5)")
     print("Number of airports in network: " + str(veritces) + "\n")
     print("========== Req No. 1 Answer ==========")
-    print("Connected airports inside network: " + str(conectados))
+    print("Connected airports inside network: " + str(total))
     print("TOP 5 most connected airports... \n")
     print(x)
 
@@ -141,8 +140,54 @@ def reqDos(catalog, aereo1, aereo2):
 def reqCuatro(catalog, origen, millas):
     data = controller.reqCuatro(catalog, origen, millas)
 
+
+
+
 def reqCinco(catalog, cerrar):
-    data = controller.reqCinco(catalog, cerrar)
+    number1, afec1, number2, afec2 = controller.reqCinco(catalog, cerrar)
+    veritces1 = controller.getNumVertices(catalog["conect_digraph"])
+    veritces2 = controller.getNumVertices(catalog["conect_normgraph"])
+    arcos1 = controller.getNumArcos(catalog["conect_digraph"])
+    arcos2 = controller.getNumArcos(catalog["conect_normgraph"])
+    size = lt.size(afec1)
+
+    x = PrettyTable()
+    x.field_names = (["IATA", "Name", "City", "Country"])
+    x.max_width = 25
+    x.hrules = ALL
+
+
+    if size > 6:
+        for k in range(1,4):
+            i = lt.getElement(afec1,k)
+            x.add_row([i["IATA"], i["Name"], i["City"], i["Country"]])         
+
+        for k in range(size-2, size+1):
+            i = lt.getElement(afec1,k)
+            x.add_row([i["IATA"], i["Name"], i["City"], i["Country"]])
+        
+    else:
+        data = lt.iterator(afec1)
+        for i in data:
+            x.add_row([i["IATA"], i["Name"], i["City"], i["Country"]])
+
+
+
+    print("==========Req No.5 Inputs==========")
+    print("Closing the airport with IATA code: " + cerrar + "\n")
+    print("--- Airport-Routes Digraph ---")
+    print("Original number of Airports: " + str(veritces1) + " and Routes: " + str(arcos1))
+    print("--- Airport-Routes Graph ---")
+    print("Original number of Airports: " + str(veritces2) + " and Routes: " + str(arcos2) + "\n")
+    print("+++ Removing Airport with IATA: " + cerrar + "\n")
+    print("Original number of Airports: " + str(veritces1-1) + " and Routes: " + str(arcos1- number1))
+    print("--- Airport-Routes Graph ---")
+    print("Original number of Airports: " + str(veritces2-1) + " and Routes: " + str(arcos2- number2) + "\n")
+    print("==========Req No.5 Answer==========")
+    print("There are " + str(lt.size(afec1)) + " Airports affected by the removal of " + cerrar)
+    print("The first and last 3 Airports affected are: ")
+    print(x)
+
 
 
 def printMenu():

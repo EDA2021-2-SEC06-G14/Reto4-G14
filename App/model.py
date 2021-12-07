@@ -25,6 +25,7 @@
  """
 
 
+from DISClib.DataStructures.arraylist import newList
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -187,6 +188,7 @@ def reqUno(catalog):
     intercon = lt.newList("ARRAY_LIST")
     vertices = gr.vertices(catalog["conect_digraph"])
     ver = lt.iterator(vertices)
+    total = 0
 
     for v in ver:
         inedges = gr.indegree(catalog["conect_digraph"], v)
@@ -199,9 +201,12 @@ def reqUno(catalog):
                 'airport' : info}
         lt.addLast(intercon, airp)
 
+        if number != 0:
+            total +=1
+
     intercon = sa.sort(intercon, cmpnumedges)
 
-    return intercon
+    return intercon, total
 
 
 def reqDos(catalog, aereo1, aereo2):
@@ -220,8 +225,41 @@ def reqCuatro(catalog, origen, millas):
 
 
 def reqCinco(catalog, cerrar):
+    number1 = 0
+    afec1 = lt.newList("ARRAY_LIST")
+    if gr.containsVertex(catalog["conect_digraph"], cerrar):
+        inedges1 = gr.indegree(catalog["conect_digraph"], cerrar)
+        outedges1 =  gr.outdegree(catalog["conect_digraph"], cerrar)
+        number1 = inedges1 + outedges1
 
-    a = ""
+        afectados = lt.iterator(gr.adjacents(catalog["conect_digraph"], cerrar))
+        cont1 = lt.newList("ARRAY_LIST")
+        
+        
+        for i in afectados:
+            if lt.isPresent(cont1, i) == 0:
+                p = me.getValue(mp.get(catalog["airports"], i))
+                lt.addLast(cont1, i)
+                lt.addLast(afec1, p)
+
+    number2 = 0
+    afec2 = lt.newList("ARRAY_LIST")
+    if gr.containsVertex(catalog["conect_normgraph"], cerrar):
+        number2 = gr.degree(catalog["conect_normgraph"], cerrar)
+
+        afectados2 = lt.iterator(gr.adjacents(catalog["conect_normgraph"], cerrar))
+        cont2 = lt.newList("ARRAY_LIST")
+        
+        
+        for i in afectados2:
+            if lt.isPresent(cont1, i) == 0:
+                p = me.getValue(mp.get(catalog["airports"], i))
+                lt.addLast(cont2, i)
+                lt.addLast(afec2, p)
+
+
+    return number1, afec1, number2, afec2, 
+    
 
 
 
