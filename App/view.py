@@ -145,9 +145,14 @@ def reqTres(catalog,ciu,reg):
         latori=coso['lat']
         lonori=coso['lng']
     else:
+        q = PrettyTable()
+        q.field_names = (["Numero","City", "Country","Lat",'Lng','Admin_Name'])
+        q.max_width = 25
+        q.hrules = ALL
         for x in range(1,tamanio+1):
             ele=lt.getElement(la_lista,x)
-            print(str(x)+"="+str(ele))
+            q.add_row([str(x),ele["city"], ele["country"],ele["lat"],ele["lng"],ele["admin_name"]])
+        print(q)
             
         pos=int(input("Coloque el numero de la ciudad de interes de origen:"))
         cosa=lt.getElement(la_lista,pos)
@@ -160,10 +165,14 @@ def reqTres(catalog,ciu,reg):
         latreg=coso['lat']
         lonreg=coso['lng']
     else:
-        for x in range(1,tamaniodos+1):
-            ele=lt.getElement(la_listdos,x)
-            print(str(x)+"="+str(ele))
-            
+        e = PrettyTable()
+        e.field_names = (["Numero","City", "Country","Lat",'Lng','Admin_Name'])
+        e.max_width = 25
+        e.hrules = ALL
+        for x in range(1,tamanio+1):
+            ele=lt.getElement(la_lista,x)
+            e.add_row([str(x),ele["city"], ele["country"],ele["lat"],ele["lng"],ele["admin_name"]])
+        print(e)    
         pos=int(input("Coloque el numero de la ciudad de interes de regreso:"))
         cosa=lt.getElement(la_listdos,pos)
         latreg=cosa['lat']
