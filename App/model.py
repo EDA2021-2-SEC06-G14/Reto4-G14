@@ -32,7 +32,7 @@ from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
-
+from DISClib.ADT import stack as stack
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
 los mismos.
@@ -67,11 +67,13 @@ los mismos.
 import config
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as mp
+from math import radians, cos, sin, asin, sqrt
 from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import prim as pr
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
+from DISClib.ADT import orderedmap as om
 
 assert config
 
@@ -116,6 +118,8 @@ def newAnalyzer():
                                               directed=False,
                                               size=14000,
                                               comparefunction=compareStopIds)
+        
+        catalog["Longitud"] = om.newMap(omaptype= "RBT")
         return catalog
     except Exception as exp:
         error.reraise(exp, 'model:newAnalyzer')
@@ -138,21 +142,166 @@ def addAirport(catalog, stopid, todo):
     except Exception as exp:
         error.reraise(exp, 'model:addstop')
 
-def addCity(catalog, stopid, todo):
+def addCity(analyzer, stopid, todo):
     """
     Adiciona una estación como un vertice del grafo
     """
     try:
-        if not mp.contains(catalog["cities"],stopid):
-            city = lt.newList("ARRAY_LIST")
-            mp.put(catalog["cities"],stopid,city)
+        
+        #if not mp.contains(analyzer["cities"],stopid):
+            #mp.put(analyzer["cities"],stopid,todo)
+        existyear = mp.contains(analyzer["cities"],stopid)
+        if existyear:
+            entry = mp.get(analyzer["cities"],stopid)
+            laciudad = me.getValue(entry)
         else:
-            city = me.getValue(mp.get(catalog["cities"],stopid))
-            
-        lt.addLast(city, todo)
-
+            laciudad = newCity(stopid)
+            mp.put(analyzer["cities"], stopid, laciudad)
+        lt.addLast(laciudad['citiess'], todo)
+        return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addstop')
+
+def newCity(bornyear):
+    """
+    Esta funcion crea la estructura de libros asociados
+    a un año.
+    """
+    entry = {'name': "", "citiess": None}
+    entry['name'] = bornyear
+    entry['citiess'] = lt.newList('ARRAY_LIST')
+    return entry
+
+def reqTresParteUno(analizer, ciu):
+    pareja = mp.get(analizer['cities'],ciu)
+    diccio= me.getValue(pareja)
+    lista=diccio["citiess"]
+    return lista
+    #tamanio=lt.size(lista)
+    #if tamanio<2:
+
+def addLongitud(catalog, a):
+    """
+    Anade una longitud al mapa si no existe ya 
+    """
+    longitudes = catalog["Longitud"]
+
+    longitud = float(a["Longitude"])
+    latitud = float(a["Latitude"])
+
+    existe = om.contains(longitudes,longitud)
+
+    if existe:
+        lon = om.get(longitudes, longitud)
+        lon = me.getValue(lon)
+        existex2=om.contains(lon,latitud)
+        if existex2:
+            lat = om.get(lon,latitud)
+            lat = me.getValue(lat)
+        else:
+            lat=lt.newList("ARRAY_LIST")
+            om.put(lon,latitud,lat)
+
+        lt.addLast(lat,a)
+
+    else:
+        lon = om.newMap(omaptype= "RBT")
+        lat=lt.newList("ARRAY_LIST")
+        lt.addLast(lat,a)
+        om.put(lon, latitud,lat)
+        om.put(longitudes, longitud, lon)
+
+def reqTresParteDos(catalog,latori,lonori,latreg,lonreg):
+    lalisticaori=lalista(catalog,latori,lonori)
+    tamaori= lt.size(lalisticaori)
+    d=999999999999
+    ganador=None
+    for i in range(1,tamaori+1):
+        ele= lt.getElement(lalisticaori,i)
+        dis=haversine(float(lonori),float(latori),float(ele['Longitude']),float(ele['Latitude']))
+        if float(dis)<d:
+            d=dis
+            ganador=ele
+
+    lalisticareg=lalista(catalog,latreg,lonreg)
+    tamareg= lt.size(lalisticareg)
+    dd=99999999999999
+    ganadord=None
+    for i in range(1,tamareg+1):
+        ele= lt.getElement(lalisticareg,i)
+        dis=haversine(float(lonreg),float(latreg),float(ele['Longitude']),float(ele['Latitude']))
+        if float(dis)<dd:
+            dd=dis
+            ganadord=ele
+
+    lista_paradinhas=lt.newList("SINGLE_LINKED")
+    rtafinal="No hay"
+    rtarefinal="No hay"
+    elgrafo=djk.Dijkstra(catalog['conect_digraph'],ganador['IATA'])
+    if djk.hasPathTo(elgrafo,ganadord['IATA']):
+        rtafinal=djk.distTo(elgrafo,ganadord['IATA'])
+        rtarefinal=djk.pathTo(elgrafo,ganadord['IATA'])
+        rtaremegafinal=djk.pathTo(elgrafo,ganadord['IATA'])
+    total=0
+    if not stack.isEmpty(rtarefinal):
+        edge = stack.pop(rtarefinal)
+        total+=float(edge['weight'])
+        gg=mp.get(catalog["airports"],edge['vertexA'])
+        g=me.getValue(gg)
+        hh=mp.get(catalog["airports"],edge['vertexB'])
+        h=me.getValue(hh)
+        lt.addFirst(lista_paradinhas,g)
+        lt.addFirst(lista_paradinhas,h)
+    while not stack.isEmpty(rtarefinal):
+        edge = stack.pop(rtarefinal)
+        total+=float(edge['weight'])
+        hh=mp.get(catalog["airports"],edge['vertexB'])
+        h=me.getValue(hh)
+        lt.addFirst(lista_paradinhas,h)
+
+        
+    return rtafinal,rtaremegafinal,ganador,ganadord,total,lista_paradinhas
+    
+def lalista(catalog, latori,lonori):
+    longitudes = catalog["Longitud"]
+    rta = lt.newList("ARRAY_LIST")
+    loninferior=float(lonori)-1
+    lonsuperior=float(lonori)+1
+    latinferior=float(latori)-1
+    latsuperior=float(latori)+1
+    while lt.size(rta)==0:
+        resp = om.values(longitudes, loninferior, lonsuperior)
+        resp = lt.iterator(resp)
+        for i in resp:
+            respuesta= om.values(i,latinferior,latsuperior)
+            respuesta = lt.iterator(respuesta)
+            for j in respuesta:
+                re = lt.iterator(j)
+                for k in re:
+                    lt.addLast(rta,k)
+        loninferior-=1
+        lonsuperior+=1
+        latinferior-=1
+        latsuperior+=1
+    return rta
+    
+
+
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance in kilometers between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
+    return c * r
 
 
 def addConnection(catalog, origin, destination, distance):
@@ -286,7 +435,7 @@ def getMapSize(mapa):
     size = 0
 
     for i in data:
-        size += lt.size(i)
+        size += lt.size(i["citiess"])
 
     return size
 

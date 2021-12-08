@@ -68,6 +68,7 @@ def loadServices(catalog):
             firstservice1=todo
         iata= todo["IATA"]
         model.addAirport(catalog, iata, todo)
+        model.addLongitud(catalog,todo)
     lastservice1 = todo
         
     
@@ -117,6 +118,12 @@ def reqUno(catalog):
 
 def reqDos(catalog, aereo1, aereo2):
     return model.reqDos(catalog, aereo1, aereo2)
+
+def reqTresParteUno(catalog, ciu):
+    return model.reqTresParteUno(catalog, ciu)
+
+def reqTresParteDos(catalog,latori,lonori,latreg,lonreg):
+    return model.reqTresParteDos(catalog,latori,lonori,latreg,lonreg)
 
 def GetAirport(catalog, aereo):
     return model.GetAirport(catalog, aereo)

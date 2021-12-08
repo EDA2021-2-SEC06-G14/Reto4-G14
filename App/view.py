@@ -26,6 +26,7 @@ import controller
 from prettytable import PrettyTable, ALL
 from time import process_time
 from DISClib.ADT import list as lt
+from DISClib.ADT import stack as stack
 assert cf
 
 sys.setrecursionlimit(2 ** 20)
@@ -136,6 +137,84 @@ def reqDos(catalog, aereo1, aereo2):
     print("- Does the \'" + a1["Name"] + "\' and the \'" + a2["Name"] + "\' belong together?")
     print("- ANS: " + str(data[1]))
 
+def reqTres(catalog,ciu,reg):
+    la_lista = controller.reqTresParteUno(catalog,ciu)
+    tamanio=lt.size(la_lista)
+    if tamanio<2:
+        coso=lt.firstElement(la_lista)
+        latori=coso['lat']
+        lonori=coso['lng']
+    else:
+        for x in range(1,tamanio+1):
+            ele=lt.getElement(la_lista,x)
+            print(str(x)+"="+str(ele))
+            
+        pos=int(input("Coloque el numero de la ciudad de interes de origen:"))
+        cosa=lt.getElement(la_lista,pos)
+        latori=cosa['lat']
+        lonori=cosa['lng']
+    la_listdos = controller.reqTresParteUno(catalog,reg)
+    tamaniodos=lt.size(la_listdos)
+    if tamaniodos<2:
+        coso=lt.firstElement(la_listdos)
+        latreg=coso['lat']
+        lonreg=coso['lng']
+    else:
+        for x in range(1,tamaniodos+1):
+            ele=lt.getElement(la_listdos,x)
+            print(str(x)+"="+str(ele))
+            
+        pos=int(input("Coloque el numero de la ciudad de interes de regreso:"))
+        cosa=lt.getElement(la_listdos,pos)
+        latreg=cosa['lat']
+        lonreg=cosa['lng']
+
+    rta,rrta,aerori,aeroreg,total,listaparadas = controller.reqTresParteDos(catalog,latori,lonori,latreg,lonreg)
+    print("==========Req No.3 Inputs==========")
+    print("Departure city: " + ciu)
+    print("Arrival city: " + reg)
+    print("==========Req No.3 Answer==========")
+    print("++The departure airport in " + ciu+ " is:")
+    x = PrettyTable()
+    x.field_names = (["IATA", "Name", "City", "Country"])
+    x.max_width = 25
+    x.hrules = ALL
+    x.add_row([aerori['IATA'], aerori["Name"], aerori["City"], aerori["Country"]])
+    print(x)
+    print("++The arrival airport in " + reg+ " is:")
+    y = PrettyTable()
+    y.field_names = (["IATA", "Name", "City", "Country"])
+    y.max_width = 25
+    y.hrules = ALL
+    y.add_row([aeroreg['IATA'], aeroreg["Name"], aeroreg["City"], aeroreg["Country"]])
+    print(y)
+    print("++Dijkstra Trip Details+++")
+    print("Total distance: "+str(total))
+    print("Trip Path:")
+    z = PrettyTable()
+    z.field_names = (["Airline", "Departure", "Destination", "Distance"])
+    z.max_width = 25
+    z.hrules = ALL
+    while not stack.isEmpty(rrta):
+        edge = stack.pop(rrta)
+        z.add_row(["xxx",edge["vertexA"],edge["vertexB"],edge["weight"]])
+    print(z)
+
+    print("-Trip Stops")
+    w = PrettyTable()
+    w.field_names = (["IATA", "Name", "City", "Country"])
+    w.max_width = 25
+    w.hrules = ALL
+    for i in range(1,lt.size(listaparadas)+1):
+        op=lt.getElement(listaparadas,i)
+        w.add_row([op['IATA'], op["Name"], op["City"], op["Country"]])
+    print(w)
+
+
+
+
+
+
 
 def reqCuatro(catalog, origen, millas):
     data = controller.reqCuatro(catalog, origen, millas)
@@ -233,7 +312,12 @@ while True:
         print("Time = " + str(t2-t1)+"seg\n")
 
     elif int(inputs[0]) == 4:
-        print("Funcion en desarrollo...\n")
+        origen = input("Nombre de la ciudad de origen: \n >")
+        regreso = input("Nombre de la ciudad de destino: \n >")
+        t1 = process_time()
+        reqTres(catalog, origen, regreso)
+        t2 = process_time()
+        print("Time = " + str(t2-t1)+"seg\n")
 
     elif int(inputs[0]) == 5:
         origen = input("Aereopuerto de origen: \n >")
