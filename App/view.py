@@ -28,6 +28,7 @@ from time import process_time
 from DISClib.ADT import list as lt
 from DISClib.ADT import stack as stack
 assert cf
+from DISClib.ADT.graph import gr
 
 sys.setrecursionlimit(2 ** 20)
 
@@ -226,7 +227,13 @@ def reqTres(catalog,ciu,reg):
 
 
 def reqCuatro(catalog, origen, millas):
-    data = controller.reqCuatro(catalog, origen, millas)
+    data,a,o,grafo = controller.reqCuatro(catalog, origen, millas)
+    
+    print(data)
+    print(o)
+    print(a)
+    print(gr.numVertices(grafo))
+    
 
 
 

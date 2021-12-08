@@ -70,6 +70,7 @@ from DISClib.ADT import map as mp
 from math import radians, cos, sin, asin, sqrt
 from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import dfs
 from DISClib.Algorithms.Graphs import prim as pr
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
@@ -369,8 +370,32 @@ def reqCuatro(catalog, origen, millas):
 
     disponibles  = (float(millas)/2)*1.6
     search = pr.PrimMST(catalog["conect_normgraph"])
-    mst = pr.prim(catalog["conect_normgraph"], search, origen)
-    return mst
+    ey=pr.edgesMST(catalog["conect_normgraph"],search)
+    vertices=catalog["airports"]
+    arcos=search["edgeTo"]["table"]
+    elgrafo = gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=14000,
+                                              comparefunction=compareStopIds)
+    tamanio=lt.size(arcos)
+    for f in range(1,tamanio+1):
+        coso=lt.getElement(arcos,f)
+        if coso["value"]!=None and coso["value"]["vertexA"]!=None and coso["value"]["vertexB"]!=None:
+            if not gr.containsVertex(elgrafo, coso["value"]["vertexA"]):
+                gr.insertVertex(elgrafo, coso["value"]["vertexA"])
+            if not gr.containsVertex(elgrafo, coso["value"]["vertexB"]):
+                gr.insertVertex(elgrafo, coso["value"]["vertexB"])
+            gr.addEdge(elgrafo,coso["value"]["vertexA"],coso["value"]['vertexB'],coso["value"]['weight'])
+
+    if gr.containsVertex(elgrafo, origen):
+        recorrido=dfs.DepthFirstSearch(elgrafo,origen)
+
+    
+
+        
+
+    arcos= pr.weightMST(catalog["conect_normgraph"],search)
+    return search,ey,arcos,elgrafo
 
 
 def reqCinco(catalog, cerrar):
