@@ -370,32 +370,49 @@ def reqCuatro(catalog, origen, millas):
 
     disponibles  = (float(millas)/2)*1.6
     search = pr.PrimMST(catalog["conect_normgraph"])
-    ey=pr.edgesMST(catalog["conect_normgraph"],search)
-    vertices=catalog["airports"]
-    arcos=search["edgeTo"]["table"]
-    elgrafo = gr.newGraph(datastructure='ADJ_LIST',
-                                              directed=True,
-                                              size=14000,
-                                              comparefunction=compareStopIds)
-    tamanio=lt.size(arcos)
-    for f in range(1,tamanio+1):
-        coso=lt.getElement(arcos,f)
-        if coso["value"]!=None and coso["value"]["vertexA"]!=None and coso["value"]["vertexB"]!=None:
-            if not gr.containsVertex(elgrafo, coso["value"]["vertexA"]):
-                gr.insertVertex(elgrafo, coso["value"]["vertexA"])
-            if not gr.containsVertex(elgrafo, coso["value"]["vertexB"]):
-                gr.insertVertex(elgrafo, coso["value"]["vertexB"])
-            gr.addEdge(elgrafo,coso["value"]["vertexA"],coso["value"]['vertexB'],coso["value"]['weight'])
+    search = pr.edgesMST(catalog["conect_normgraph"], search)
+    vertices = lt.newList("ARRAY_LIST")
+    posible = lt.newList("ARRAY_LIST")
 
-    if gr.containsVertex(elgrafo, origen):
-        recorrido=dfs.DepthFirstSearch(elgrafo,origen)
+    for e in lt.iterator(search["mst"]):
+        if e["vertexA"] != origen and e["vertexB"] != origen:
+            if not lt.isPresent(vertices, e["vertexA"]):
+                lt.addLast(vertices, e["vertexA"])
+            if not lt.isPresent(vertices, e["vertexB"]):
+                lt.addLast(vertices, e["vertexB"])
 
-    
+    rutas = dfs.DepthFirstSearch(catalog["conect_normgraph"], origen)
 
+    for i in lt.iterator(vertices):
+        a = dfs.pathTo(rutas, i)
+
+        if a != None:
+            
+            dato = {"paradas": lt.size(a),
+                    "ruta": a}
+            lt.addLast(posible, dato)
+
+    posible = sa.sort(posible, cmpparadas)
+    mejor = lt.getElement(posible, 1)
+    mejor = mejor["ruta"]
+
+    final = lt.newList()
+
+    distancia = 0
+
+    for pa in range(1, lt.size(mejor)):
         
+        a = lt.getElement(mejor, pa)
+        b = lt.getElement(mejor, pa + 1)
+        dis = gr.getEdge(catalog["conect_normgraph"], a, b)
+        lt.addLast(final, dis)
+        distancia += dis["weight"]
 
-    arcos= pr.weightMST(catalog["conect_normgraph"],search)
-    return search,ey,arcos,elgrafo
+    salida = me.getValue(mp.get(catalog["airports"], origen))
+
+    alcanza = lt.size(vertices)
+
+    return salida, final, alcanza, distancia
 
 
 def reqCinco(catalog, cerrar):
@@ -499,3 +516,6 @@ def compareroutes(route1, route2):
 
 def cmpnumedges(edge1, edge2):
     return edge1["edges"]>edge2["edges"]
+
+def cmpparadas(size1, size2):
+    return size1["paradas"] > size2["paradas"]

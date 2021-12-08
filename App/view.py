@@ -227,14 +227,41 @@ def reqTres(catalog,ciu,reg):
 
 
 def reqCuatro(catalog, origen, millas):
-    data,a,o,grafo = controller.reqCuatro(catalog, origen, millas)
-    
-    print(data)
-    print(o)
-    print(a)
-    print(gr.numVertices(grafo))
-    
+    salida, final, alcanza, distancia = controller.reqCuatro(catalog, origen, millas)
+    millas = float(millas)
 
+    x = PrettyTable()
+    x.field_names = (["IATA", "Name", "City", "Country"])
+    x.max_width = 25
+    x.hrules = ALL
+    x.add_row([salida['IATA'], salida["Name"], salida["City"], salida["Country"]])
+
+    y = PrettyTable()
+    y.field_names = (["Departure", "Destination", "Distance"])
+    y.max_width = 25
+    y.hrules = ALL
+
+    for i in lt.iterator(final):
+        y.add_row([i["vertexA"], i["vertexB"], i["weight"]])
+
+
+    print("==========Req No.4 Inputs==========")
+    print("Departure IATA Code: " + origen)
+    print("Available Travel Miles: " + str(millas) + "\n")
+    print("==========Req No.4 Answer==========")
+    print("+++ Departure Airport for IATA code: " + origen)
+    print(x)
+    print("\n")
+    print("- Number of possible airports : " + str(alcanza))
+    print("- Traveling distance sum between airports " + str(distancia*2) + "(km)")
+    print("- Passanger available travelling miles " + str(millas *1.6)+ "(km) \n")
+    print("+++ Longes possible route with airports +++")
+    print("- Longest possible path distance: " + str(distancia*2))
+    print("- Longest possible path details: ")
+    print(y)
+    print("\n")
+    print("The passanger needs " +str((distancia*2 - millas *1.6)/1.6) + " miles to complete the trip")
+ 
 
 
 
